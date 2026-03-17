@@ -1,0 +1,50 @@
+commands:
+- genus -no_gui -f START.tcl -log logs/genus.log
+- mkdir -p outputs && cd outputs
+- ln -sf ../results_syn/syn_out.v design.v
+- ln -sf ../results_syn/syn_out._default_constraint_mode_.sdc design.sdc
+- ln -sf ../results_syn/syn_out.sdf design.sdf
+- ln -sf ../results_syn/syn_out.spef design.spef
+- ln -sf ../name_map.rpt design.namemap
+debug:
+- genus -no_gui -f results_syn/syn_out.genus_setup.tcl
+inputs:
+- 1_FloorDiv_32b.sv
+- 2_FloorDiv_32_flopped.sv
+- adk
+- constraints.tcl
+name: cadence-genus-synthesis
+outputs:
+- design.v
+- design.sdc
+- design.sdf
+- design.spef
+- design.namemap
+parameters:
+  clock_period: 1.0
+  design_name: undefined
+  flatten_effort: 0
+  gate_clock: true
+  order:
+  - designer-interface.tcl
+  - setup-session.tcl
+  - read-design.tcl
+  - constraints.tcl
+  - compile.tcl
+  - generate-results.tcl
+  read_hdl_defines: '{NUM_PIPELINE_STAGES_VAL=4}'
+  uniquify_with_design_name: true
+postconditions:
+- assert File( 'outputs/design.v' )
+- assert File( 'outputs/design.sdc' )
+- assert File( 'outputs/design.sdf' )
+- assert File( 'outputs/design.spef' )
+- assert 'Cannot resolve reference' not in File( 'logs/genus.log' )
+- assert 'Error   :' not in File( 'logs/genus.log' )
+- assert 'create_clock' in File( 'outputs/design.sdc' )
+preconditions:
+- assert Tool( 'genus' )
+- assert File( 'inputs/1_FloorDiv_32b.sv' )
+- assert File( 'inputs/2_FloorDiv_32_flopped.sv' )
+- assert File( 'inputs/adk' )
+- assert File( 'inputs/constraints.tcl' )
