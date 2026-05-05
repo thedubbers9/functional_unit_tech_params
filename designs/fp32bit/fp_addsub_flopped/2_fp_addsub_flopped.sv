@@ -1,14 +1,18 @@
 `default_nettype none
 
 module fp_addsub_flopped (
-    input wire [15:0] a,
-    input wire [15:0] b,
+    input wire [31:0] a,
+    input wire [31:0] b,
     input wire clk,
-    output reg [15:0] sum_flopped
+    output reg [31:0] sum_flopped
 );
 
-    parameter NUM_PIPELINE_STAGES = 1;
-    parameter BITWIDTH = 16;
+    `ifdef NUM_PIPELINE_STAGES_VAL
+        parameter NUM_PIPELINE_STAGES = `NUM_PIPELINE_STAGES_VAL;
+    `else
+        parameter NUM_PIPELINE_STAGES = 1;
+    `endif
+    parameter BITWIDTH = 32;
 
     // Flopped inputs
     logic [BITWIDTH - 1:0] a_flopped [NUM_PIPELINE_STAGES - 1:0];
@@ -66,10 +70,10 @@ module fp_addsub_flopped (
     end
 
     // Instantiate the ADD_16b module to perform addition
-    fp_addsub #(.EXP(5), .SIG(11)) iDUT (
+    fp_addsub #(.EXP(8), .SIG(23)) iDUT (
         .clk(clk),
         .rst_n(1),
-        .sub(0),
+        .sub(1),
         .a_ieee(multiplied_xor_result_flopped_a),
         .b_ieee(multiplied_xor_result_flopped_b),
         .roundingMode(3'b000),

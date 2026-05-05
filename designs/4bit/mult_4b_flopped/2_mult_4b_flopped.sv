@@ -1,10 +1,7 @@
 `default_nettype none
 
 module mult_4b_flopped (
-    input wire [3:0] a,
-    input wire [3:0] b,
-    input wire clk,          // Clock input for the flops
-    output reg [7:0] result
+    a, b, clk, product_flopped
 );
 
     `ifdef NUM_PIPELINE_STAGES_VAL
@@ -16,7 +13,7 @@ module mult_4b_flopped (
 
     input wire [BITWIDTH - 1:0] a,b;
     input wire clk;          // Clock input for the flops
-    output reg result;
+    output reg [2*BITWIDTH - 1:0] product_flopped;
 
     // flop the inputs
     logic [BITWIDTH - 1:0] a_flopped [NUM_PIPELINE_STAGES - 1:0];
@@ -37,6 +34,9 @@ module mult_4b_flopped (
         end
     endgenerate
 
+
+    logic [2*BITWIDTH - 1:0] result_unflopped [NUM_PIPELINE_STAGES:0];
+
     // Instantiate the mult_4b module
     mult_4b iDUT (
         .a(a_flopped[NUM_PIPELINE_STAGES - 1]),
@@ -55,8 +55,7 @@ module mult_4b_flopped (
 
     endgenerate
 
-    assign result = result_unflopped[NUM_PIPELINE_STAGES];
-
+    assign product_flopped = result_unflopped[NUM_PIPELINE_STAGES];
 
 endmodule
 

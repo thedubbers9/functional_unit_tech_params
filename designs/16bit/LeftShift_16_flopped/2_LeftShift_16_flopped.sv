@@ -7,7 +7,11 @@ module LeftShift_16_flopped (
     output reg [15:0] result_flopped
 );
 
-    parameter NUM_PIPELINE_STAGES = 1;
+    `ifdef NUM_PIPELINE_STAGES_VAL
+        parameter NUM_PIPELINE_STAGES = `NUM_PIPELINE_STAGES_VAL;
+    `else
+        parameter NUM_PIPELINE_STAGES = 1;
+    `endif
     parameter BITWIDTH = 16;
 
     // Flopped inputs

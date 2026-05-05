@@ -1,6 +1,6 @@
 `default_nettype none
 
-module fp_div_flopped (
+module fp_mul_flopped (
     input wire [15:0] a,
     input wire [15:0] b,
     input wire clk,
@@ -65,13 +65,14 @@ module fp_div_flopped (
         multiplied_xor_result_flopped_b <= multiplied_xor_result_b;
     end
 
-    // Instantiate the FP_DIV module to perform floating point division
-    // 16bit: FP_DIV #(.BITS(16), .MANTISSA_BITS(10), .EXPONENT_BITS(5)) iDUT (
-    // 32bit: FP_DIV #(.BITS(32), .MANTISSA_BITS(23), .EXPONENT_BITS(8)) iDUT (
-    FP_DIV #(.BITS(16), .MANTISSA_BITS(10), .EXPONENT_BITS(5)) iDUT (
-        .x(multiplied_xor_result_flopped_a),
-        .y(multiplied_xor_result_flopped_b),
-        .out(sum_unflopped[0])
+    // Instantiate the FP_MUL module to perform floating point multiplication
+    FP_MUL #(.EXPONENT_WIDTH(5), .MANTISSA_WIDTH(10)) iDUT (
+        .a(multiplied_xor_result_flopped_a),
+        .b(multiplied_xor_result_flopped_b),
+        .out(sum_unflopped[0]),
+        .underflow_flag(),
+        .overflow_flag(),
+        .invalid_operation_flag()
     );
 
     genvar j;

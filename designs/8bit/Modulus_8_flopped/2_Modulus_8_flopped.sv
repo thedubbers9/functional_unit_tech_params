@@ -1,32 +1,91 @@
 `default_nettype none
 
 module Modulus_8_flopped (
-    input wire [7:0] a,
-    input wire [7:0] b,
-    input wire clk,          // Clock input for the flops
-    output reg [7:0] result_flopped
+    a, b, clk, result
 );
+    
+    `ifdef NUM_PIPELINE_STAGES_VAL
+        parameter NUM_PIPELINE_STAGES = `NUM_PIPELINE_STAGES_VAL;
+    `else
+        parameter NUM_PIPELINE_STAGES = 1;
+    `endif
+    parameter BITWIDTH = 8;
 
-    // Registers for flopped inputs
-    reg [7:0] a_flopped;
-    reg [7:0] b_flopped;
+    input wire [BITWIDTH - 1:0] a,b;
+    input wire clk;          // Clock input for the flops
+    output reg [BITWIDTH - 1:0] result;
 
-    // Wires for intermediate results
-    wire [7:0] result;
+    // flop the inputs
+    logic [BITWIDTH - 1:0] a_flopped [NUM_PIPELINE_STAGES - 1:0];
+    logic [BITWIDTH - 1:0] b_flopped [NUM_PIPELINE_STAGES - 1:0];
+    
+    genvar i;
+    generate
+        for (i = 0; i < NUM_PIPELINE_STAGES; i++) begin : in_flop_gen
+            always @(posedge clk) begin
+                if (i == 0) begin
+                    a_flopped[i] <= a;
+                    b_flopped[i] <= b;
+                end else begin
+                    a_flopped[i] <= a_flopped[i - 1];
+                    b_flopped[i] <= b_flopped[i - 1];
+                end
+            end
+        end
+    endgenerate
+
+    // Edited to add input/output flops for pipelining similar to other designs;
+    // multiply/xor logic not added as original file did not contain it
+
+    // logic [2*BITWIDTH-1:0] multiplied_result_a, multiplied_result_b;
+
+    // assign multiplied_result_a = a_flopped[NUM_PIPELINE_STAGES - 1] * a_flopped[NUM_PIPELINE_STAGES - 1];
+    // assign multiplied_result_b = b_flopped[NUM_PIPELINE_STAGES - 1] * b_flopped[NUM_PIPELINE_STAGES - 1];
+
+    // logic [2*BITWIDTH-1:0] multiplied_result_flopped_a, multiplied_result_flopped_b;
+
+    // // flop the multiplied result
+    // always @(posedge clk) begin
+    //     multiplied_result_flopped_a <= multiplied_result_a;
+    //     multiplied_result_flopped_b <= multiplied_result_b;
+    // end
+
+    // logic [BITWIDTH-1:0] multiplied_xor_result_a, multiplied_xor_result_b;
+
+    // assign multiplied_xor_result_a = multiplied_result_flopped_a[BITWIDTH - 1:0] ^ multiplied_result_flopped_a[2*BITWIDTH - 1:BITWIDTH];
+    // assign multiplied_xor_result_b = multiplied_result_flopped_b[BITWIDTH - 1:0] ^ multiplied_result_flopped_b[2*BITWIDTH - 1:BITWIDTH];
+
+    // logic [BITWIDTH-1:0] multiplied_xor_result_flopped_a, multiplied_xor_result_flopped_b;
+
+    // // flop the multiplied xor result
+    // always @(posedge clk) begin
+    //     multiplied_xor_result_flopped_a <= multiplied_xor_result_a;
+    //     multiplied_xor_result_flopped_b <= multiplied_xor_result_b;
+    // end
+
+    logic result_unflopped [NUM_PIPELINE_STAGES:0];
 
     // Instantiate the DUT
     Modulus_8b iDUT (
-        .a(a_flopped),
-        .b(b_flopped),
-        .result(result)
+        .a(a_flopped[NUM_PIPELINE_STAGES - 1]),
+        .b(b_flopped[NUM_PIPELINE_STAGES - 1]),
+        .result(result_unflopped[0])
     );
 
-    // Flop the inputs and the output
-    always @(posedge clk) begin
-        a_flopped <= a;
-        b_flopped <= b;
-        result_flopped <= result;
-    end
+    genvar j;
+
+    generate
+        for (j = 1; j <= NUM_PIPELINE_STAGES; j++) begin : out_flop_gen
+            always @(posedge clk) begin
+                result_unflopped[j] <= result_unflopped[j - 1];
+            end
+        end
+
+    endgenerate
+
+    assign result = result_unflopped[NUM_PIPELINE_STAGES];
+
+
 
 endmodule
 

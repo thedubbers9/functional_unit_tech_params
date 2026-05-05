@@ -7,7 +7,11 @@ module NOT_8b_flopped (
     output reg [7:0] sum_flopped
 );
 
-    parameter NUM_PIPELINE_STAGES = 1;
+    `ifdef NUM_PIPELINE_STAGES_VAL
+        parameter NUM_PIPELINE_STAGES = `NUM_PIPELINE_STAGES_VAL;
+    `else
+        parameter NUM_PIPELINE_STAGES = 1;
+    `endif
     parameter BITWIDTH = 8;
 
     // Flopped inputs

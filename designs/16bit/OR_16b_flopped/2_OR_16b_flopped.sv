@@ -4,7 +4,11 @@ module OR_16b_flopped (
     a, clk, result
 );
 
-    parameter NUM_PIPELINE_STAGES = 1;
+    `ifdef NUM_PIPELINE_STAGES_VAL
+        parameter NUM_PIPELINE_STAGES = `NUM_PIPELINE_STAGES_VAL;
+    `else
+        parameter NUM_PIPELINE_STAGES = 1;
+    `endif
     parameter BITWIDTH = 16;
 
     input wire [BITWIDTH - 1:0] a;

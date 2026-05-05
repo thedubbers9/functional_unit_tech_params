@@ -1,10 +1,7 @@
 `default_nettype none
 
 module Modulus_4_flopped (
-    input wire [3:0] a,
-    input wire [3:0] b,
-    input wire clk,          // Clock input for the flops
-    output reg [3:0] result
+    a, b, clk, result
 );
     
     `ifdef NUM_PIPELINE_STAGES_VAL
@@ -16,7 +13,7 @@ module Modulus_4_flopped (
 
     input wire [BITWIDTH - 1:0] a,b;
     input wire clk;          // Clock input for the flops
-    output reg result;
+    output reg [BITWIDTH - 1:0] result;
 
     // flop the inputs
     logic [BITWIDTH - 1:0] a_flopped [NUM_PIPELINE_STAGES - 1:0];

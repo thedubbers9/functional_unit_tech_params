@@ -7,7 +7,11 @@ module ADD_32_flopped (
     output reg [31:0] sum_flopped
 );
 
+`ifdef NUM_PIPELINE_STAGES_VAL
+    parameter NUM_PIPELINE_STAGES = `NUM_PIPELINE_STAGES_VAL;
+`else
     parameter NUM_PIPELINE_STAGES = 1;
+`endif
     parameter BITWIDTH = 32;
 
     // Flopped inputs
@@ -16,7 +20,18 @@ module ADD_32_flopped (
 
     // Multiplied results
     logic [2*BITWIDTH-1:0] multiplied_result_a, multiplied_result_b;
-    // ...existing code...
+
+    // Flopped multiplied results
+    logic [2*BITWIDTH-1:0] multiplied_result_flopped_a, multiplied_result_flopped_b;
+
+    // XOR results
+    logic [BITWIDTH-1:0] multiplied_xor_result_a, multiplied_xor_result_b;
+
+    // Flopped XOR results
+    logic [BITWIDTH-1:0] multiplied_xor_result_flopped_a, multiplied_xor_result_flopped_b;
+
+    // Unflopped sum
+    logic [BITWIDTH-1:0] sum_unflopped [NUM_PIPELINE_STAGES:0];
 
     genvar i;
     generate

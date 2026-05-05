@@ -1,14 +1,18 @@
 `default_nettype none
 
 module fp_mul_flopped (
-    input wire [15:0] a,
-    input wire [15:0] b,
+    input wire [63:0] a,
+    input wire [63:0] b,
     input wire clk,
-    output reg [15:0] sum_flopped
+    output reg [63:0] sum_flopped
 );
 
-    parameter NUM_PIPELINE_STAGES = 1;
-    parameter BITWIDTH = 16;
+    `ifdef NUM_PIPELINE_STAGES_VAL
+        parameter NUM_PIPELINE_STAGES = `NUM_PIPELINE_STAGES_VAL;
+    `else
+        parameter NUM_PIPELINE_STAGES = 1;
+    `endif
+    parameter BITWIDTH = 64;
 
     // Flopped inputs
     logic [BITWIDTH - 1:0] a_flopped [NUM_PIPELINE_STAGES - 1:0];
@@ -68,7 +72,7 @@ module fp_mul_flopped (
     // Instantiate the FP_MUL module to perform floating point multiplication
     // 16bit: FP_MUL #(.EXPONENT_WIDTH(5), .MANTISSA_WIDTH(10)) iDUT (
     // 32bit: FP_MUL #(.EXPONENT_WIDTH(8), .MANTISSA_WIDTH(23)) iDUT (
-    FP_MUL #(.EXPONENT_WIDTH(5), .MANTISSA_WIDTH(10)) iDUT (
+    FP_MUL #(.EXPONENT_WIDTH(11), .MANTISSA_WIDTH(52)) iDUT (
         .a(multiplied_xor_result_flopped_a),
         .b(multiplied_xor_result_flopped_b),
         .out(sum_unflopped[0]),

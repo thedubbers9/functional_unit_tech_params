@@ -4,7 +4,11 @@ module Register_32b_flopped (
     a, clk, reset, result
 );
 
+`ifdef NUM_PIPELINE_STAGES_VAL
+    parameter NUM_PIPELINE_STAGES = `NUM_PIPELINE_STAGES_VAL;
+`else
     parameter NUM_PIPELINE_STAGES = 1;
+`endif
     parameter BITWIDTH = 32;
 
     input wire [BITWIDTH - 1:0] a;

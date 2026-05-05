@@ -1,14 +1,18 @@
 `default_nettype none
 
-module ADD_16_flopped (
-    input wire [15:0] a,
-    input wire [15:0] b,
-    input wire clk,          // Clock input for the flops
-    output reg [15:0] sum_flopped
+module fp_mul32_flopped (
+    input wire [31:0] a,
+    input wire [31:0] b,
+    input wire clk,
+    output reg [31:0] sum_flopped
 );
 
-    parameter NUM_PIPELINE_STAGES = 1;
-    parameter BITWIDTH = 16;
+    `ifdef NUM_PIPELINE_STAGES_VAL
+        parameter NUM_PIPELINE_STAGES = `NUM_PIPELINE_STAGES_VAL;
+    `else
+        parameter NUM_PIPELINE_STAGES = 1;
+    `endif
+    parameter BITWIDTH = 32;
 
     // Flopped inputs
     logic [BITWIDTH - 1:0] a_flopped [NUM_PIPELINE_STAGES - 1:0];
@@ -65,16 +69,18 @@ module ADD_16_flopped (
         multiplied_xor_result_flopped_b <= multiplied_xor_result_b;
     end
 
-    // Instantiate the ADD_16b module to perform addition
-    ADD_16b iDUT (
-        .a(multiplied_xor_result_flopped_a),
-        .b(multiplied_xor_result_flopped_b),
-        .sum(sum_unflopped[0])
+    // Instantiate the FP_MUL module to perform floating point multiplication
+    // 16bit: FP_MUL #(.EXPONENT_WIDTH(5), .MANTISSA_WIDTH(10)) iDUT (
+    // 32bit: FP_MUL #(.EXPONENT_WIDTH(8), .MANTISSA_WIDTH(23)) iDUT (
+    fp_mul #(.BITS(32), .MANTISSA_BITS(23), .EXPONENT_BITS(8)) iDUT (
+        .x(multiplied_xor_result_flopped_a),
+        .y(multiplied_xor_result_flopped_b),
+        .out(sum_unflopped[0])
     );
 
     genvar j;
     generate
-        // Flop the addition result through the pipeline
+        // Flop the result through the pipeline
         for (j = 1; j <= NUM_PIPELINE_STAGES; j++) begin : out_flop_gen
             always @(posedge clk) begin
                 sum_unflopped[j] <= sum_unflopped[j - 1];
